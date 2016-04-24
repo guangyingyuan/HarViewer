@@ -56,9 +56,11 @@ app.controller('HomeController', function($scope, $http) {
 			$scope.harData = result.data.har;
 			$scope.transferred = result.data.transferred;
 			$scope.onload = Math.floor(result.data.har.log.pages[0].pageTimings.onLoad);
-			
+			mydata = $scope.harData;
+
 			configureChartSettings();
-			displayPieChart(result.data);
+			displayResourceTypeChart(result.data);
+			displayResourceSizeChart(result.data);
 
 			
 
@@ -69,16 +71,52 @@ app.controller('HomeController', function($scope, $http) {
 
 });
 
-function displayPieChart(data) {
+function configureChartSettings() {
+	Chart.defaults.global.legend.position = "bottom";
+}
+
+function displayResourceTypeChart(data) {
 	var labels = [];
 	var categoryData = [];
 	var colors = [];
-	var max = data.categories[data.categories.length - 1][1];
+	var max = data.chartData[data.chartData.length - 1].num;
 
-	data.categories.forEach(function (category) {
-		labels.push(category[0]);
-		categoryData.push(category[1]);
-		colors.push(getPieSliceColor(max, category[1]));
+	data.chartData.forEach(function (resourceType) {
+		console.log(resourceType);
+		labels.push(resourceType.name);
+		categoryData.push(resourceType.num);
+	});
+
+	var data = {
+		labels: labels,
+		datasets: [{
+			label: 'Number of requests',
+			data: categoryData,
+			backgroundColor: "rgba(0,102,204,0.2)",
+			borderColor: "rgba(0,102,204,1)",
+			borderWidth: 1,
+			hoverBackgroundColor: "rgba(0,102,204,0.2)",
+			hoverBorderColor: "rgba(0,102,204,1)",
+		}]
+	};
+
+	var ctx = $("#resource-type-chart").get(0).getContext("2d");
+	var chart = new Chart(ctx, {
+		type: 'bar',
+		data: data
+	});
+}
+
+function displayResourceSizeChart(data) {
+	var labels = [];
+	var categoryData = [];
+	var colors = [];
+	var max = data.chartData[data.chartData.length - 1].num;
+
+	data.chartData.forEach(function (type) {
+		labels.push(type.name);
+		categoryData.push(type.totalSize);
+		colors.push(getPieSliceColor(max, type.num));
 	});
 
 	var data = {
@@ -90,15 +128,11 @@ function displayPieChart(data) {
 		}]
 	};
 
-	var ctx = $("#chart").get(0).getContext("2d");
-	var myPieCharet = new Chart(ctx, {
+	var ctx = $("#resource-size-chart").get(0).getContext("2d");
+	var chart = new Chart(ctx, {
 		type: 'pie',
 		data: data
 	});
-}
-
-function configureChartSettings() {
-	Chart.defaults.global.legend.position = "bottom";
 }
 
 function getPieSliceColor(max, val) {

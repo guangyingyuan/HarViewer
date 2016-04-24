@@ -14,7 +14,7 @@ router.post('/', upload.single('file'), function(req, res) {
 
 		var response = {
 			har: har,
-			categories: categorizeRequests(har.log.entries),
+			chartData: generateChartData(har.log.entries),
 			transferred: formatSizeUnits(sumSizes(har.log.entries))
 		};
 
@@ -25,31 +25,39 @@ router.post('/', upload.single('file'), function(req, res) {
 });
 
 /**
- * Sums the number of each type of file requested from a list of HAR entries
+ * Generates metrics grouped by content type of the requested data for the list
+ * of entries of an HTTP archive.
  * @param  {Array} entries array of entries from the http archive
- * @return {Object} categories of requests, a sorted array of the number of occurences of each response type
+ * @return {Array} categories of requests with metrics. Sorted by the number of requests a given type had.
  */
-function categorizeRequests(entries) {
+function generateChartData(entries) {
 
-	var categories = {};
+	var types = {};
 
 	entries.forEach(function (entry) {
 
-		if (!categories[entry.response.content.mimeType]) {
-			categories[entry.response.content.mimeType] = 1;
-		} else {
-			categories[entry.response.content.mimeType]++;
+		var mimeType = entry.response.content.mimeType;
+
+		if (!types[mimeType]) {
+			types[mimeType] = {
+				name: mimeType,
+				num : 0,
+				totalSize : 0
+			};
 		}
+
+		types[mimeType].num++;
+		types[mimeType].totalSize += entry.response.content.size;
 
 	});
 
 	var result = [];
 
-	for (var type in categories) {
-		result.push([type, categories[type]]);
+	for (var type in types) {
+		result.push(types[type]);
 	}
 
-	result.sort(function (a,b){return a[1] - b[1]})
+	result.sort(function (a,b){return a.num - b.num})
 
 	return result;
 
@@ -73,18 +81,18 @@ function sumSizes(entries) {
 
 function formatSizeUnits(bytes){
 	
-	if (bytes>=1073741824) {
-		bytes=(bytes/1073741824).toFixed(2)+' GB';
-	} else if (bytes>=1048576)    {
-		bytes=(bytes/1048576).toFixed(2)+' MB';
-	} else if (bytes>=1024) {
-		bytes=(bytes/1024).toFixed(2)+' KB';
-	} else if (bytes>1) {
-		bytes=bytes+' bytes';
-	} else if (bytes==1) {
-		bytes=bytes+' byte';
+	if (bytes >= 1073741824) {
+		bytes = (bytes/1073741824).toFixed(2) + ' GB';
+	} else if (bytes >= 1048576)    {
+		bytes = (bytes/1048576).toFixed(2) + ' MB';
+	} else if (bytes >= 1024) {
+		bytes = (bytes/1024).toFixed(2) + ' KB';
+	} else if (bytes > 1) {
+		bytes = bytes + ' bytes';
+	} else if (bytes == 1) {
+		bytes = bytes + ' byte';
 	} else {
-		bytes='0 byte';
+		bytes = '0 byte';
 	}
 
 	  return bytes;
