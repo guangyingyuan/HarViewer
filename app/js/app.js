@@ -84,32 +84,53 @@ function configureChartSettings() {
 
 function displayResourceTypeChart(data) {
 	var labels = [];
-	var categoryData = [];
+	var crossOrigin = [];
+	var sameOrigin = [];
 	var colors = [];
 	var max = data.chartData[data.chartData.length - 1].num;
 
 	data.chartData.forEach(function (resourceType) {
 		labels.push(resourceType.name);
-		categoryData.push(resourceType.num);
+		crossOrigin.push(resourceType.crossOriginReqs);
+		sameOrigin.push(resourceType.sameOriginReqs);
 	});
 
 	var data = {
 		labels: labels,
 		datasets: [{
-			label: 'Number of requests',
-			data: categoryData,
+			label: 'Same Origin',
+			data: sameOrigin,
 			backgroundColor: "rgba(0,102,204,0.2)",
 			borderColor: "rgba(0,102,204,1)",
 			borderWidth: 1,
 			hoverBackgroundColor: "rgba(0,102,204,0.2)",
 			hoverBorderColor: "rgba(0,102,204,1)",
+		},
+		{
+			label: 'Cross Origin',
+			data: crossOrigin,
+			backgroundColor: "rgba(191,0,0,0.2)",
+			borderColor: "rgba(191,0,0,1)",
+			borderWidth: 1,
+			hoverBackgroundColor: "rgba(191,0,0,0.2)",
+			hoverBorderColor: "rgba(191,0,0,1)",
 		}]
 	};
 
 	var ctx = $("#resource-type-chart").get(0).getContext("2d");
 	var chart = new Chart(ctx, {
 		type: 'bar',
-		data: data
+		data: data,
+		options: {
+			scales: {
+				xAxes: [{
+					stacked: true
+				}],
+				yAxes: [{
+					stacked: true
+				}]
+			}
+		}
 	});
 }
 

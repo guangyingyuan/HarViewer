@@ -14,7 +14,7 @@ router.post('/', upload.single('file'), function(req, res) {
 
 		var response = {
 			har: har,
-			chartData: generateChartData(har.log.entries),
+			chartData: generateChartData(har),
 			transferred: formatSizeUnits(sumSizes(har.log.entries))
 		};
 
@@ -27,12 +27,15 @@ router.post('/', upload.single('file'), function(req, res) {
 /**
  * Generates metrics grouped by content type of the requested data for the list
  * of entries of an HTTP archive.
- * @param  {Array} entries array of entries from the http archive
- * @return {Array} categories of requests with metrics. Sorted by the number of requests a given type had.
+ * @param  {Object} The HTTP archive
+ * @return {Array} categories of requests with metrics.
  */
-function generateChartData(entries) {
+function generateChartData(har) {
 
+	var entries = har.log.entries;
+	var requestDomain = extractDomain(har.log.pages[0].title);
 	var types = {};
+
 
 	entries.forEach(function (entry) {
 
@@ -41,13 +44,20 @@ function generateChartData(entries) {
 		if (!types[mimeType]) {
 			types[mimeType] = {
 				name: mimeType,
-				num : 0,
+				crossOriginReqs : 0,
+				sameOriginReqs : 0,
 				totalSize : 0
 			};
 		}
 
 		types[mimeType].num++;
 		types[mimeType].totalSize += entry.response.content.size;
+
+		if (requestDomain == extractDomain(entry.request.url)) {
+			types[mimeType].sameOriginReqs++;
+		} else {
+			types[mimeType].crossOriginReqs++;
+		}
 
 	});
 
@@ -56,8 +66,6 @@ function generateChartData(entries) {
 	for (var type in types) {
 		result.push(types[type]);
 	}
-
-	result.sort(function (a,b){return a.num - b.num})
 
 	return result;
 
@@ -95,7 +103,23 @@ function formatSizeUnits(bytes){
 		bytes = '0 byte';
 	}
 
-	  return bytes;
+	return bytes;
+}
+
+function extractDomain(url) {
+	var domain;
+	//find & remove protocol (http, ftp, etc.) and get domain
+	if (url.indexOf("://") > -1) {
+		domain = url.split('/')[2];
+	}
+	else {
+		domain = url.split('/')[0];
+	}
+
+	//find & remove port number
+	domain = domain.split(':')[0];
+
+	return domain;
 }
 
 module.exports = router;
