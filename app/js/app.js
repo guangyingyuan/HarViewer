@@ -56,37 +56,11 @@ app.controller('HomeController', function($scope, $http) {
 			$scope.harData = result.data.har;
 			$scope.transferred = result.data.transferred;
 			$scope.onload = Math.floor(result.data.har.log.pages[0].pageTimings.onLoad);
-			mydata = result.data;
+			
+			configureChartSettings();
+			displayPieChart(result.data);
 
-			var labels = [];
-			var categoryData = [];
-			var colors = [];
-			var max = result.data.categories[result.data.categories.length - 1][1];
-
-			result.data.categories.forEach(function (category) {
-				labels.push(category[0]);
-				categoryData.push(category[1]);
-				colors.push(getPieSliceColor(max, category[1]));
-			});
-
-			var data = {
-				labels: labels,
-				datasets: [{
-					label: 'Response Type',
-					data: categoryData,
-					backgroundColor: colors,
-					hoverBackgroundColor: []
-				}]
-			};
-
-			console.log(data);
-
-
-			var ctx = $("#chart").get(0).getContext("2d");
-			var myPieCharet = new Chart(ctx, {
-				type: 'pie',
-				data: data
-			});
+			
 
 		});
 
@@ -94,6 +68,38 @@ app.controller('HomeController', function($scope, $http) {
 	}
 
 });
+
+function displayPieChart(data) {
+	var labels = [];
+	var categoryData = [];
+	var colors = [];
+	var max = data.categories[data.categories.length - 1][1];
+
+	data.categories.forEach(function (category) {
+		labels.push(category[0]);
+		categoryData.push(category[1]);
+		colors.push(getPieSliceColor(max, category[1]));
+	});
+
+	var data = {
+		labels: labels,
+		datasets: [{
+			data: categoryData,
+			backgroundColor: colors,
+			hoverBackgroundColor: []
+		}]
+	};
+
+	var ctx = $("#chart").get(0).getContext("2d");
+	var myPieCharet = new Chart(ctx, {
+		type: 'pie',
+		data: data
+	});
+}
+
+function configureChartSettings() {
+	Chart.defaults.global.legend.position = "bottom";
+}
 
 function getPieSliceColor(max, val) {
 

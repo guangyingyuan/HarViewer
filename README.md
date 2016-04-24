@@ -11,3 +11,5 @@ npm install
 bower install
 node server
 ```
+
+Open a browser to http://localhost:8080/
