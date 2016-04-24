@@ -82,7 +82,6 @@ function displayResourceTypeChart(data) {
 	var max = data.chartData[data.chartData.length - 1].num;
 
 	data.chartData.forEach(function (resourceType) {
-		console.log(resourceType);
 		labels.push(resourceType.name);
 		categoryData.push(resourceType.num);
 	});
@@ -113,10 +112,10 @@ function displayResourceSizeChart(data) {
 	var colors = [];
 	var max = data.chartData[data.chartData.length - 1].num;
 
-	data.chartData.forEach(function (type) {
+	data.chartData.forEach(function (type, i) {
 		labels.push(type.name);
 		categoryData.push(type.totalSize);
-		colors.push(getPieSliceColor(max, type.num));
+		colors.push(getPieSliceColor(i));
 	});
 
 	var data = {
@@ -135,17 +134,17 @@ function displayResourceSizeChart(data) {
 	});
 }
 
-function getPieSliceColor(max, val) {
+function getPieSliceColor(index) {
 
-	var scale = Math.floor(255/max);
+	var colors = ["4D4D4D",
+		"5DA5DA",
+		"FAA43A",
+		"60BD68",
+		"F17CB0",
+		"B2912F",
+		"B276B2",
+		"DECF3F",
+		"F15854"];
 
-	var color = 255 - (val * scale)
-	var hex = color.toString(16);
-
-	if (hex.length == 1) {
-		hex = "0" + hex;
-	}
-
-
-	return "#D8" + hex + hex;
+	return "#" + colors[index%colors.length]
 }
