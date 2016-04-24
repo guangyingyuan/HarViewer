@@ -1,19 +1,21 @@
 <div id="home" class="container" ng-hide="harData">
-	<h1>Welcome!</h1>
+	<h1>HarViewer</h1>
 
-	<h3><span class="label label-default">Drag and drop a .har file here to analyze</span></h3>
+
+	<h3><span class="label label-default">Drag and drop a .har file below to analyze</span></h3>
 
 	<center>
-		<form>
 			<div id="drophere">
 				<span class="glyphicon glyphicon-file" aria-hidden="true" />
 			</div>
 
 			<br />
-			<!-- <input type="file" accept="har" /> -->
-
-		</form>
-
+			<form id="file-form" ng-submit="submitFile()" enctype="multipart/form-data">
+				<div class="box">
+					<input id="file-input" class="file" type="file" accept="har" />
+					<input type="submit" />
+				</div>
+			</form>
 	</center>
 </div>
 
@@ -46,14 +48,14 @@
 			<th>Name</th>
 			<th>Method</th>
 			<th>Status</th>
-			<th>Size (bytes)</th>
+			<th>Size</th>
 			<th>Time (ms)</th>
 		</tr>
 		<tr ng-repeat="entry in harData.log.entries">
 			<td title="{{ entry.request.url }}" nowrap>{{ entry.request.url.substring(entry.request.url.lastIndexOf('/')) }}</td>
 			<td>{{ entry.request.method }}</td>
 			<td>{{ entry.response.status }}</td>
-			<td>{{ entry.response.content.size }}</td>
+			<td>{{ formatSizeUnits(entry.response.content.size) }}</td>
 			<td>{{ entry.time }}</td>
 		</tr>
 	</table>	

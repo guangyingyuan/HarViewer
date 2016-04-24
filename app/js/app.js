@@ -11,38 +11,11 @@ var app = angular.module("app", ['ngRoute']).config(function($routeProvider) {
 
 app.controller('HomeController', function($scope, $http) {
 
-	var doc = document.getElementById("drophere");
+	$scope.formatSizeUnits = formatSizeUnits;
 
-	doc.ondragover = function() {
-		this.className = 'file';
-		return false;
-	};
-
-	doc.ondragleave = function() {
-		this.className = '';
-		return false;
-	}
-
-	doc.ondragend = function() {
-		this.className = '';
-		return false;
-	}
-
-	doc.ondrop = function(event) {
-		event.preventDefault && event.preventDefault();
-
-		this.className = '';
-		var files = event.dataTransfer.files;
-
-		if (files.length != 1) {
-			alert("Only uplaod one http archive at a time.");
-			return;
-		}
-
-		theFiles = files;
-
+	$scope.submitFile = function() {
 		var formData = new FormData();
-		formData.append('file', files[0]);
+		formData.append('file', $scope.files[0]);
 
 		$http({
 			method: 'POST',
@@ -62,12 +35,46 @@ app.controller('HomeController', function($scope, $http) {
 			displayResourceTypeChart(result.data);
 			displayResourceSizeChart(result.data);
 
-			
-
 		});
+	}
+
+	var fileDrop = document.getElementById("drophere");
+
+	fileDrop.ondragover = function() {
+		this.className = 'file';
+		return false;
+	};
+
+	fileDrop.ondragleave = function() {
+		this.className = '';
+		return false;
+	}
+
+	fileDrop.ondragend = function() {
+		this.className = '';
+		return false;
+	}
+
+	fileDrop.ondrop = function(event) {
+		event.preventDefault && event.preventDefault();
+
+		this.className = '';
+		var files = event.dataTransfer.files;
+
+		if (files.length != 1) {
+			alert("Only uplaod one http archive at a time.");
+			return;
+		}
+
+		$scope.files = event.dataTransfer.files;
+		$scope.submitFile();
 
 		return false;
 	}
+
+	$('input[type=file]').on('change', function (event) {
+		$scope.files = event.target.files;
+	});
 
 });
 
@@ -110,7 +117,10 @@ function displayResourceSizeChart(data) {
 	var labels = [];
 	var categoryData = [];
 	var colors = [];
-	var max = data.chartData[data.chartData.length - 1].num;
+
+	var sorted = data.chartData.sort(function (a, b) {
+		return a.totalSize - b.totalSize;
+	});
 
 	data.chartData.forEach(function (type, i) {
 		labels.push(type.name);
@@ -118,7 +128,7 @@ function displayResourceSizeChart(data) {
 		colors.push(getPieSliceColor(i));
 	});
 
-	var data = {
+	var resourceData = {
 		labels: labels,
 		datasets: [{
 			data: categoryData,
@@ -130,7 +140,7 @@ function displayResourceSizeChart(data) {
 	var ctx = $("#resource-size-chart").get(0).getContext("2d");
 	var chart = new Chart(ctx, {
 		type: 'pie',
-		data: data,
+		data: resourceData,
 		options : {
 			tooltips : {
 				callbacks : {

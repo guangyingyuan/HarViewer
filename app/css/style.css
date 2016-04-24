@@ -43,3 +43,7 @@ span.glyphicon-file {
 	overflow: hidden;
 	padding: 3px;
 }
+
+input.file {
+	display: inline;
+}
