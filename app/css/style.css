@@ -1,0 +1,49 @@
+body {
+	background-color: white;
+	color: #333;
+	height: 100%;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+#home {
+	text-align: center;
+}
+
+span.glyphicon-file {
+    font-size: 6em;
+    line-height: 192px;
+}
+
+#drophere {
+	border: 5px dashed #333;
+	width: 200px;
+	height: 200px;
+	text-align: center;
+	line-height: 200px;
+	color: #333;
+}
+
+#drophere.file {
+	border: 5px dashed #5FC560;
+	color: #5FC560;
+}
+
+#dashboard {
+	padding: 10px;
+}
+
+#entry-table {
+	width: 100%;
+	table-layout: fixed;
+}
+
+#entry-table td {
+	overflow: hidden;
+	padding: 3px;
+}
+
+#piechart-wrapper {
+	width : 400px;
+}
