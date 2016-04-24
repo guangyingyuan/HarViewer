@@ -5,11 +5,35 @@ var app = angular.module("app", ['ngRoute']).config(function($routeProvider) {
 		controller: 'HomeController'
 	});
 
+	$routeProvider.when('/dashboard', {
+		templateUrl: 'dashboard.html',
+		controller: 'DashboardController'
+	});
+
 	$routeProvider.otherwise({ redirectTo: '/home'});
 
 });
 
-app.controller('HomeController', function($scope, $http) {
+app.factory('chartService', function() {
+
+	var chartData;
+
+	function setChartData(data) {
+		chartData = data;
+	}
+
+	function getChartData() {
+		return chartData;
+	}
+
+	return {
+		setChartData: setChartData,
+		getChartData: getChartData
+	}
+
+});
+
+app.controller('HomeController', function($scope, $http, $location, chartService) {
 
 	$scope.formatSizeUnits = formatSizeUnits;
 
@@ -26,15 +50,9 @@ app.controller('HomeController', function($scope, $http) {
 			data: formData
 		}).
 		then(function(result) {
-			$scope.harData = result.data.har;
-			$scope.transferred = result.data.transferred;
-			$scope.onload = Math.floor(result.data.har.log.pages[0].pageTimings.onLoad);
-			mydata = $scope.harData;
+			chartService.setChartData(result.data);
 
-			configureChartSettings();
-			displayResourceTypeChart(result.data);
-			displayResourceSizeChart(result.data);
-
+			$location.path('/dashboard');
 		});
 	}
 
@@ -75,6 +93,22 @@ app.controller('HomeController', function($scope, $http) {
 	$('input[type=file]').on('change', function (event) {
 		$scope.files = event.target.files;
 	});
+
+});
+
+app.controller('DashboardController', function($scope, $http, $location, chartService) {
+
+	if (chartService.getChartData() == undefined) {
+		$location.path('/home');
+	}
+
+	$scope.harData = chartService.getChartData().har;
+	$scope.transferred = chartService.getChartData().transferred;
+	$scope.onload = Math.floor(chartService.getChartData().har.log.pages[0].pageTimings.onLoad);
+
+	configureChartSettings();
+	displayResourceTypeChart(chartService.getChartData());
+	displayResourceSizeChart(chartService.getChartData());
 
 });
 
