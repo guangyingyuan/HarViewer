@@ -35,8 +35,6 @@ app.factory('chartService', function() {
 
 app.controller('HomeController', function($scope, $http, $location, chartService) {
 
-	$scope.formatSizeUnits = formatSizeUnits;
-
 	$scope.submitFile = function() {
 		var formData = new FormData();
 		formData.append('file', $scope.files[0]);
@@ -80,7 +78,7 @@ app.controller('HomeController', function($scope, $http, $location, chartService
 		var files = event.dataTransfer.files;
 
 		if (files.length != 1) {
-			alert("Only uplaod one http archive at a time.");
+			alert("Only upload one http archive at a time.");
 			return;
 		}
 
@@ -100,8 +98,10 @@ app.controller('DashboardController', function($scope, $http, $location, chartSe
 
 	if (chartService.getChartData() == undefined) {
 		$location.path('/home');
+		return;
 	}
 
+	$scope.formatSizeUnits = formatSizeUnits;
 	$scope.harData = chartService.getChartData().har;
 	$scope.transferred = chartService.getChartData().transferred;
 	$scope.onload = Math.floor(chartService.getChartData().har.log.pages[0].pageTimings.onLoad);
@@ -109,6 +109,7 @@ app.controller('DashboardController', function($scope, $http, $location, chartSe
 	configureChartSettings();
 	displayResourceTypeChart(chartService.getChartData());
 	displayResourceSizeChart(chartService.getChartData());
+	diplayTimingsChart(chartService.getChartData());
 
 });
 
@@ -120,8 +121,6 @@ function displayResourceTypeChart(data) {
 	var labels = [];
 	var crossOrigin = [];
 	var sameOrigin = [];
-	var colors = [];
-	var max = data.chartData[data.chartData.length - 1].num;
 
 	data.chartData.forEach(function (resourceType) {
 		labels.push(resourceType.name);
@@ -209,6 +208,37 @@ function displayResourceSizeChart(data) {
 			}
 		}
 	});
+}
+
+function diplayTimingsChart(data) {
+
+	var labels = [];
+	var amounts = [];
+
+	for (var key in data.timings) {
+		labels.push(key);
+		amounts.push(data.timings[key]);
+	}
+
+	var data = {
+		labels: labels,
+		datasets: [{
+			label: 'Total Time (ms)',
+			data: amounts,
+			backgroundColor: "rgba(0,102,204,0.2)",
+			borderColor: "rgba(0,102,204,1)",
+			borderWidth: 1,
+			hoverBackgroundColor: "rgba(0,102,204,0.2)",
+			hoverBorderColor: "rgba(0,102,204,1)",
+		}]
+	};
+
+	var ctx = $("#time-graph").get(0).getContext("2d");
+	var chart = new Chart(ctx, {
+		type: 'bar',
+		data: data
+	});
+
 }
 
 function getPieSliceColor(index) {

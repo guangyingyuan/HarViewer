@@ -12,13 +12,7 @@ router.post('/', upload.single('file'), function(req, res) {
 
 		var har = JSON.parse(data);
 
-		var response = {
-			har: har,
-			chartData: generateChartData(har),
-			transferred: formatSizeUnits(sumSizes(har.log.entries))
-		};
-
-		res.send(response);
+		res.send(generateMetrics(har));
 
 	});
 
@@ -30,11 +24,21 @@ router.post('/', upload.single('file'), function(req, res) {
  * @param  {Object} The HTTP archive
  * @return {Array} categories of requests with metrics.
  */
-function generateChartData(har) {
+function generateMetrics(har) {
 
 	var entries = har.log.entries;
 	var requestDomain = extractDomain(har.log.pages[0].title);
+	var totalSize = 0;
 	var types = {};
+	var timings = {
+		blocked: 0,
+		connect: 0,
+		dns: 0,
+		receive: 0,
+		send: 0,
+		ssl: 0,
+		wait: 0
+	}
 
 
 	entries.forEach(function (entry) {
@@ -59,15 +63,31 @@ function generateChartData(har) {
 			types[mimeType].crossOriginReqs++;
 		}
 
+		totalSize += entry.response.content.size;
+
+
+		timings.blocked = addIfPositive(timings.blocked, entry.timings.blocked);
+		timings.connect = addIfPositive(timings.connect, entry.timings.connect);
+		timings.dns = addIfPositive(timings.dns, entry.timings.dns);
+		timings.receive = addIfPositive(timings.receive, entry.timings.receive);
+		timings.send = addIfPositive(timings.send, entry.timings.send);
+		timings.ssl = addIfPositive(timings.ssl, entry.timings.ssl);
+		timings.wait = addIfPositive(timings.wait, entry.timings.wait);
+
 	});
 
-	var result = [];
+	var chartData = [];
 
 	for (var type in types) {
-		result.push(types[type]);
+		chartData.push(types[type]);
 	}
 
-	return result;
+	return {
+		har: har,
+		chartData: chartData,
+		transferred: formatSizeUnits(totalSize),
+		timings: timings
+	};
 
 }
 
@@ -120,6 +140,19 @@ function extractDomain(url) {
 	domain = domain.split(':')[0];
 
 	return domain;
+}
+
+/**
+ * returns a + b if b is positive, otherwise just a is returned
+ */
+function addIfPositive(a, b) {
+
+	if (b > 0) {
+		return a + b;
+	}
+
+	return a;
+
 }
 
 module.exports = router;
