@@ -101,6 +101,10 @@ app.controller('DashboardController', function($scope, $http, $location, chartSe
 		return;
 	}
 
+	// Default table sorting values
+	$scope.sortType = 'response.content.size';
+	$scope.sortReverse = true;
+
 	$scope.formatSizeUnits = formatSizeUnits;
 	$scope.harData = chartService.getChartData().har;
 	$scope.transferred = chartService.getChartData().transferred;
