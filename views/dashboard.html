@@ -27,9 +27,7 @@
 	<h2>Requests</h2>
 	<table id="entry-table" class="table table-striped table-hover">
 		<tr>
-			<th>
-				Name
-			</th>
+			<th>URL</th>
 			<th>Method</th>
 			<th>Status</th>
 			<th>
@@ -40,10 +38,10 @@
 				</a>
 			</th>
 			<th>
-				<a href="javascript:void(0)" ng-click="sortType = 'entry.time'; sortReverse = !sortReverse">
+				<a href="javascript:void(0)" ng-click="sortType = 'time'; sortReverse = !sortReverse">
 					Time (ms)
-					<span class="glyphicon glyphicon-chevron-down" aria-hidden="true" ng-show="sortType == 'entry.time' && !sortReverse"></span>
-					<span class="glyphicon glyphicon-chevron-up" aria-hidden="true" ng-show="sortType == 'entry.time' && sortReverse"></span>
+					<span class="glyphicon glyphicon-chevron-down" aria-hidden="true" ng-show="sortType == 'time' && !sortReverse"></span>
+					<span class="glyphicon glyphicon-chevron-up" aria-hidden="true" ng-show="sortType == 'time' && sortReverse"></span>
 				</a>
 			</th>
 		</tr>
